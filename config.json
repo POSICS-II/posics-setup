@@ -1,29 +1,17 @@
 {
   "daq": {
     "trigger": {
-      "1":{
-        "serial": "FW878/020",
-        "source": "TRIGGER_AUX",
-        "threshold": 1,
-        "enable": true,
-        "direction": "ABOVE",
-        "delay": 0,
-        "n_pre_samples": 400,
-        "n_post_samples": 400,
-        "n_waveforms": 1000
-      },
-      "2":{
-        "serial": "FW881/048",
-        "source": "TRIGGER_AUX",
-        "threshold": 1,
-        "enable": true,
-        "direction": "ABOVE",
-        "delay": 0,
-        "n_pre_samples": 400,
-        "n_post_samples": 400,
-        "n_waveforms": 1000
-
-      }
+      "serial_1": "FW878/020",
+      "serial_2": "FW881/048",
+      "source": "TRIGGER_AUX",
+      "threshold": 0.5,
+      "enable": true,
+      "direction": "ABOVE",
+      "delay": 0,
+      "n_pre_samples": 200,
+      "n_post_samples": 800,
+      "n_waveforms": 10,
+      "delta_t": 800E-12
     },
     "channel": {
       "1": {
@@ -103,7 +91,7 @@
   "led": {
     "mode": "pulse",
     "frequency": 1,
-    "amplitude": 3.6,
+    "amplitude": 3.8,
     "offset": 0,
     "width": 20E-9,
     "delay": 0,
