@@ -11,14 +11,21 @@ WAIT_TIME = 1.5  # s
 logger = logging.getLogger(__name__)
 
 
+def voltage_to_adc(voltage, voltage_max, max_value=32512):
+
+    adc = int(voltage / voltage_max * max_value)
+
+    return adc
+
+
 def voltage_to_trigger_threshold(voltage):
 
-    max_voltage = 1
-    min_voltage = -1
+    voltage_max = 1
+    voltage_min = -1
 
-    if (voltage <= max_voltage) and (voltage >= min_voltage):
+    if (voltage <= voltage_max) and (voltage >= voltage_min):
 
-        threshold = int(voltage / 2 * 2**16 + 2**16/2)
+        threshold = voltage_to_adc(voltage, voltage_max)
         return threshold
 
     else:
@@ -36,7 +43,7 @@ def time_interval_to_timebase(delta_t):
 
         else:
 
-            timebase = math.log2(delta_t/200E-12)
+            timebase = int(math.log2(delta_t/200E-12))
             return timebase
 
     else:
