@@ -11,7 +11,7 @@ import numpy as np
 from picosdk.functions import adc2mV, assert_pico_ok
 import json
 import matplotlib.pyplot as plt
-from linearstage.utils import voltage_to_trigger_threshold
+from linearstage.utils import voltage_to_trigger_threshold, time_interval_to_timebase
 
 
 with open('config.json', 'r') as f:
@@ -20,19 +20,28 @@ with open('config.json', 'r') as f:
     config = data['daq']
 
 status = {}
-serials = []
-handles = []
 
-i = 0
-for trigger_number, trigger_config in config['trigger'].items():
 
-    serials.append(ctypes.c_char_p(trigger_config['serial'].encode('utf-8')))
-    handles.append(ctypes.c_int16())
+serial_1 = ctypes.c_char_p(config['trigger']['serial_1'].encode('utf-8'))
+serial_2 = ctypes.c_char_p(config['trigger']['serial_2'].encode('utf-8'))
+handle_1 = ctypes.c_int16()
+handle_2 = ctypes.c_int16()
+handles = [handle_1, handle_2]
+serials = [serial_1, serial_2]
 
-    status['OpenUnit_' + trigger_number] = ps.ps6000OpenUnit(ctypes.byref(handles[i]), serials[i])
-    assert_pico_ok(status['OpenUnit_' + trigger_number])
-    i += 1
+status['OpenUnit_1'] = ps.ps6000OpenUnit(ctypes.byref(handle_1), serial_1)
+status['OpenUnit_2'] = ps.ps6000OpenUnit(ctypes.byref(handle_2), serial_2)
+assert_pico_ok(status['OpenUnit_1'])
+assert_pico_ok(status['OpenUnit_2'])
 
+n_waveforms = config['trigger']['n_waveforms']
+n_channels = 0
+n_pre_samples = config['trigger']['n_pre_samples']
+n_post_samples = config['trigger']['n_post_samples']
+n_samples = n_pre_samples + n_post_samples
+timebase = time_interval_to_timebase(config['trigger']['delta_t'])
+
+couple = []
 
 for channel_number, channel_config in config['channel'].items():
 
@@ -44,38 +53,87 @@ for channel_number, channel_config in config['channel'].items():
     offset = channel_config['offset']
     bandwidth = ps.PS6000_BANDWIDTH_LIMITER['PS6000_' + channel_config['bandwidth']]
 
-    status['SetChannel_' + channel_number] = ps.ps6000SetChannel(handle, channel, enable, coupling, voltage_range,
+    status['SetChannel_' + channel_number] = ps.ps6000SetChannel(handle, channel, int(enable), coupling, voltage_range,
                                                                  offset, bandwidth)
 
     assert_pico_ok(status['SetChannel_' + channel_number])
 
+    if enable:
+        couple.append((channel_number, handle, channel, channel_config['daq']))
+        n_channels += 1
+
 print(status)
 
-for trigger_number, trigger_config in config['trigger'].items():
+waveforms = [[(ctypes.c_int16 * n_samples)() for _ in range(n_waveforms)] for _ in range(n_channels)]
 
-    handle = handles[int(trigger_number) - 1]
-    enable = trigger_config['enable']
+for handle in handles:
+
+    trigger_config = config['trigger']
+
+    enable = True
     source = ps.PS6000_CHANNEL['PS6000_' + trigger_config['source']]
     threshold = voltage_to_trigger_threshold(trigger_config['threshold'])
     direction = ps.PS6000_THRESHOLD_DIRECTION['PS6000_' + trigger_config['direction']]
     delay = trigger_config['delay']
 
-    status['SetSimpleTrigger_' + trigger_number] = ps.ps6000SetSimpleTrigger(handle,
+    status['SetSimpleTrigger_' + str(handle.value)] = ps.ps6000SetSimpleTrigger(handle,
                                                                              enable,
                                                                              source,
                                                                              threshold,
                                                                              direction,
                                                                              delay,
                                                                              0)
-    assert_pico_ok(status['SetSimpleTrigger_' + trigger_number])
+    assert_pico_ok(status['SetSimpleTrigger_' + str(handle.value)])
 
-    n_waveforms = trigger_config['n_waveforms']
-    n_pre_samples = trigger_config['n_pre_samples']
-    n_post_samples = trigger_config['n_post_samples']
-    n_samples = n_pre_samples + n_post_samples
-    ps.ps6000SetNoCaptures(handle, n_waveforms)
-    ps.ps6000RunBlock(handle, n_pre_samples, n_post_samples, )
+    pParameter = ctypes.c_void_p()
+    oversampling = 0
+    status['MemorySegments_' + str(handle.value)] = ps.ps6000MemorySegments(handle, n_waveforms, None)
+    status['SetNoOfCaptures_' + str(handle.value)] = ps.ps6000SetNoOfCaptures(handle, n_waveforms)
+    status['RunBlock_' + str(handle.value)] = ps.ps6000RunBlock(handle, n_pre_samples, n_post_samples,
+                                                             timebase, oversampling, None, 0, None, None)
 
+    for segment in range(n_waveforms):
+
+        for j in range(n_channels):
+
+            waveform = waveforms[j][segment]
+            channel = couple[j][2]
+            status['SetDataBuffersBulk_{}_{}'.format(couple[j][0], segment)] = ps.ps6000SetDataBuffersBulk(
+                handle, channel, ctypes.byref(waveform), None, n_samples, segment, 0)
+
+    ready = ctypes.c_int16(0)
+    check = ctypes.c_int16(0)
+    while ready.value == check.value:
+        status["IsReady_{}".format(str(handle.value))] = ps.ps6000IsReady(handle, ctypes.byref(ready))
+        print(handle.value)
+
+
+cmaxSamples_1 = ctypes.c_int32(n_samples)
+cmaxSamples_2 = ctypes.c_int32(n_samples)
+status["GetValuesBulk_1"] = ps.ps6000GetValuesBulk(handle_1, ctypes.byref(cmaxSamples_1), 0, n_waveforms - 1, 0, 0, None)
+status["GetValuesBulk_2"] = ps.ps6000GetValuesBulk(handle_2, ctypes.byref(cmaxSamples_2), 0, n_waveforms - 1, 0, 0, None)
+
+
+for i in range(n_waveforms):
+    data_1 = np.ctypeslib.as_array(waveforms[0][i])
+    data_2 = np.ctypeslib.as_array(waveforms[1][i])
+    data_3 = np.ctypeslib.as_array(waveforms[2][i])
+    data_4 = np.ctypeslib.as_array(waveforms[3][i])
+    data_5 = np.ctypeslib.as_array(waveforms[4][i])
+    data_6 = np.ctypeslib.as_array(waveforms[5][i])
+
+    plt.figure()
+    plt.plot(data_1, label='channel_1')
+    plt.plot(data_2, label='channel_2')
+    plt.plot(data_3, label='channel_3')
+    plt.plot(data_4, label='channel_4')
+    plt.plot(data_5, label='channel_5')
+    plt.plot(data_6, label='channel_6')
+    plt.legend(loc='best')
+    plt.savefig('test_{}.png'.format(i))
+
+for key, val in status.items():
+    assert_pico_ok(val)
 
 for handle in handles:
 
