@@ -1,5 +1,5 @@
 from thorlabs_apt_device.devices.tdc001 import TDC001
-from utils import position_to_motor, motor_to_position, velocity_to_motor, acceleration_to_motor, compute_time_of_movement, MAX_ACCELERATION, MAX_VELOCITY, MAX_RANGE
+from posicssetup.utils import motor_to_position, velocity_to_motor, acceleration_to_motor, compute_time_of_movement, MAX_ACCELERATION, MAX_VELOCITY, MAX_RANGE
 import time
 import logging
 

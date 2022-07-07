@@ -11,7 +11,7 @@ import numpy as np
 from picosdk.functions import adc2mV, assert_pico_ok
 import json
 import matplotlib.pyplot as plt
-from linearstage.utils import voltage_to_trigger_threshold, time_interval_to_timebase
+from posicssetup.utils.utils import voltage_to_trigger_threshold, time_interval_to_timebase
 
 
 with open('config.json', 'r') as f:

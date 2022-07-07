@@ -1,12 +1,12 @@
 from thorlabs_apt_device.devices.tdc001 import TDC001
-from utils import position_to_motor, velocity_to_motor, acceleration_to_motor, compute_time_of_movement, MAX_ACCELERATION, MAX_VELOCITY
+from posicssetup.utils import position_to_motor, velocity_to_motor, acceleration_to_motor, compute_time_of_movement
 import time
 import logging
 from tqdm import tqdm
 import json
 
 
-with open('../config.json', 'r') as f:
+with open('../../config.json', 'r') as f:
 
     data = json.load(f)
     config = data['stage']

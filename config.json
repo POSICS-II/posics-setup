@@ -107,20 +107,25 @@
     "voltage": -33.0
   },
   "stage": {
-    "port_x": "/dev/ttyUSB2",
-    "port_y": "/dev/ttyUSB3",
-    "start_position_x": 20.321943940898787,
-    "start_position_y": 27.08706941058534,
-    "velocity_x": 0.6,
-    "velocity_y": 0.6,
-    "acceleration_x": 1.125,
-    "acceleration_y": 1.125,
-    "step_x": 2,
-    "step_y": 2,
-    "length_x": 16,
-    "length_y": 16,
-    "wait_time" : 1.5,
-    "velocity_home" : 0.6,
-    "offset_home": 0
+    "vertical": {
+      "serial": "/dev/ttyUSB2",
+      "start_position": 20.321943940898787,
+      "velocity": 0.6,
+      "acceleration": 1.125,
+      "step": 2,
+      "length": 16,
+      "velocity_home" : 0.6,
+      "offset_home": 0
+    },
+    "horizontal": {
+      "serial": "/dev/ttyUSB3",
+      "start_position": 27.08706941058534,
+      "velocity": 0.6,
+      "acceleration": 1.125,
+      "step": 2,
+      "length": 16,
+      "velocity_home" : 0.6,
+      "offset_home": 0
+    }
   }
 }

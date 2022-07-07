@@ -3,7 +3,7 @@ from picosdk.ps6000 import ps6000 as ps
 import numpy as np
 from picosdk.functions import assert_pico_ok
 import json
-from linearstage.utils import voltage_to_trigger_threshold, time_interval_to_timebase
+from posicssetup.utils.utils import voltage_to_trigger_threshold, time_interval_to_timebase
 import logging
 
 logger = logging.getLogger(__name__)
