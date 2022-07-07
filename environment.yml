@@ -3,12 +3,11 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - json
   - matplotlib
   - numpy
   - pip
   - python=3.10
-  - pyvisa
+  - pyvisa-py
   - tk
   - tqdm
   - pip:
