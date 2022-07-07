@@ -125,8 +125,6 @@ class PicoScope6000:
                     self.status['SetDataBuffersBulk_{}_{}'.format(segment, channel_name)] = ps.ps6000SetDataBuffersBulk(
                         self._handle, channel, ctypes.byref(self._data[segment][channel]), None, self.n_samples, segment, 0)
 
-                    print(self._data[segment][channel])
-
     def check_status(self):
 
         for key, val in self.status.items():
