@@ -130,7 +130,7 @@ for i in range(n_waveforms):
     plt.plot(data_5, label='channel_5')
     plt.plot(data_6, label='channel_6')
     plt.legend(loc='best')
-    plt.savefig('test_{}.png'.format(i))
+    plt.savefig('tmp/test_{}.png'.format(i))
 
 for key, val in status.items():
     assert_pico_ok(val)
