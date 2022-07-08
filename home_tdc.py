@@ -1,8 +1,3 @@
-from thorlabs_apt_device.devices.tdc001 import TDC001
-import time
-import logging
-import json
-from posicssetup.utils.utils import position_to_motor, MAX_RANGE, velocity_to_motor, compute_time_of_movement
 from posicssetup.instruments.linear_stage import LinearStageTDC001
 
 config_file = 'config.json'
