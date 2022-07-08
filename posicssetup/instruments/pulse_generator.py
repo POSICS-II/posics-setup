@@ -1,9 +1,13 @@
 import time
 import pyvisa as visa
 import json
+import logging
+import atexit
+
+logger = logging.getLogger(__name__)
 
 rm = visa.ResourceManager('@py')
-TIME_SLEEP = 0.4
+TIME_SLEEP = 2.5
 
 
 class PulseGeneratorTG5011:
@@ -14,11 +18,13 @@ class PulseGeneratorTG5011:
             self.config = json.load(f)['led']
 
         self.serial = self.config['serial']
-        self._resource = rm.open_resource(self.serial)
+        self._resource = rm.open_resource(self.serial, send_end=True)
         self.set_synch_out(False)
         self.set_main_out(False)
         self._setup_pulse()
         self.beep()
+
+        atexit.register(self.close)
 
     def __str__(self):
 
@@ -32,14 +38,14 @@ class PulseGeneratorTG5011:
 
         self.set_synch_out(False)
         self.set_main_out(False)
-        self.write('LOCAL')
         self.beep()
-        # self._resource.close()
+        self.write('LOCAL')
+        self._resource.close()
 
     def write(self, message: str):
 
         time.sleep(TIME_SLEEP)
-        self._resource.write(message)
+        self._resource.write(message, )
 
     def query(self, message: str):
 
@@ -57,16 +63,17 @@ class PulseGeneratorTG5011:
         self.write('AMPUNIT VPP')
         self.write('AMPL {}'.format(self.config['amplitude']))
         self.write('DCOFFS {}'.format(self.config['offset']))
-        self.write('OUTPUT ON')
 
     def set_synch_out(self, enable: bool):
 
         message = 'ON' if enable else 'OFF'
 
         self.write('SYNCOUT {}'.format(message))
+        logger.info('Setting trigger output of pulse generator ({}) to {}'.format(self.serial, message))
 
     def set_main_out(self, enable: bool):
 
         message = 'ON' if enable else 'OFF'
 
         self.write('OUTPUT {}'.format(message))
+        logger.info('Setting main output of pulse generator ({}) to {}'.format(self.serial, message))

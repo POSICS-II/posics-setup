@@ -2,8 +2,8 @@ from thorlabs_apt_device.devices.tdc001 import TDC001
 from posicssetup.utils.utils import position_to_motor, velocity_to_motor, acceleration_to_motor, compute_time_of_movement
 import time
 import logging
-from tqdm import tqdm
 import json
+import atexit
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +29,17 @@ class LinearStageTDC001:
         self.velocity = self.config['velocity']
         self.acceleration = self.config['acceleration']
         self.velocity_home = self.config['velocity_home']
-        self.offset_home = self.config['offset_home']
+        self.offset_home = float(self.config['offset_home'])
         self._resource = TDC001(serial_port=self.serial, home=False)
         time.sleep(TIME_SLEEP)
         self.set_velocity()
+        atexit.register(self.close)
 
     def __str__(self):
 
         return str(self._resource.status)
 
-    def __del__(self):
+    def close(self):
 
         self._resource.close()
 
@@ -70,7 +71,7 @@ class LinearStageTDC001:
         time.sleep(TIME_SLEEP)
         duration = compute_time_of_movement(self.MAX_POSITION, self.velocity_home, 0.1, 0)
         duration += compute_time_of_movement(self.offset_home, self.velocity_home, 0.1, 0)
-        logger.info("Moving translation stage {} ({}) to home with offset {.4f} mm".format(self.name,
+        logger.info("Moving translation stage {} ({}) to home with offset {:.4f} mm".format(self.name,
                                                                                            self.serial,
                                                                                            self.offset_home))
         self._resource.home()

@@ -1,4 +1,6 @@
 import ctypes
+import time
+
 from picosdk.ps6000 import ps6000 as ps
 import numpy as np
 from picosdk.functions import assert_pico_ok
@@ -96,21 +98,18 @@ class PicoScope6000:
         direction = ps.PS6000_THRESHOLD_DIRECTION['PS6000_' + self.trigger_direction]
         delay = self.trigger_delay
 
-        self.status['SetSimpleTrigger'] = ps.ps6000SetSimpleTrigger(
-            self._handle, enable,
-                                                                                    source,
-                                                                                    threshold,
-                                                                                    direction,
-                                                                                    delay,
-                                                                                    0)
+        self.status['SetSimpleTrigger'] = ps.ps6000SetSimpleTrigger(self._handle, enable, source, threshold, direction,
+                                                                    delay, 0)
+
+        self.status['MemorySegments'] = ps.ps6000MemorySegments(self._handle, self.n_waveforms, None)
+        self.status['SetNoOfCaptures'] = ps.ps6000SetNoOfCaptures(self._handle, self.n_waveforms)
 
         oversampling = 0
-        self.status['MemorySegments'] = ps.ps6000MemorySegments(self._handle, self.n_waveforms,
-                                                                                    None)
-        self.status['SetNoOfCaptures'] = ps.ps6000SetNoOfCaptures(self._handle, self.n_waveforms)
         self.status['RunBlock'] = ps.ps6000RunBlock(self._handle, self.n_pre_samples,
-                                                                        self.n_post_samples, self.timebase,
-                                                                        oversampling, None, 0, None, None)
+                                                    self.n_post_samples, self.timebase,
+                                                    oversampling, None, 0, None, None)
+
+        logger.info("Trigger ready for oscilloscope {} ({})".format(self.handle, self.serial))
 
     def _setup_data(self):
 
@@ -120,10 +119,9 @@ class PicoScope6000:
                 if enable:
 
                     channel = ps.PS6000_CHANNEL['PS6000_CHANNEL_' + channel_name]
-                    # data = self._data[segment][channel]
-                    #data = np.ctypeslib.as_ctypes(self.data[segment, channel])
                     self.status['SetDataBuffersBulk_{}_{}'.format(segment, channel_name)] = ps.ps6000SetDataBuffersBulk(
                         self._handle, channel, ctypes.byref(self._data[segment][channel]), None, self.n_samples, segment, 0)
+        logger.info("Data buffer ready for oscilloscope {} ({})".format(self.handle, self.serial))
 
     def check_status(self):
 
@@ -134,13 +132,16 @@ class PicoScope6000:
 
     def read_data(self):
 
+        self.check_status()
+
         ready = ctypes.c_int16(0)
         check = ctypes.c_int16(0)
         while ready.value == check.value:
             self.status["IsReady"] = ps.ps6000IsReady(self._handle, ctypes.byref(ready))
+            time.sleep(0.1)
 
         cmaxSamples = ctypes.c_int32(self.n_samples)
-        self.status["GetValuesBulk_1"] = ps.ps6000GetValuesBulk(self._handle, ctypes.byref(cmaxSamples), 0,
+        self.status["GetValuesBulk"] = ps.ps6000GetValuesBulk(self._handle, ctypes.byref(cmaxSamples), 0,
                                                            self.n_waveforms - 1, 0, 0, None)
         data = []
 
