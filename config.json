@@ -104,6 +104,7 @@
     "current_2": 0.2
   },
   "sipm":{
+    "serial": "ASRL/dev/ttyUSB5::INSTR",
     "voltage": -33.0
   },
   "stage": {
