@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 from posicssetup.instruments.osciloscopes import PicoScope6000
 from posicssetup.instruments.pulse_generator import PulseGeneratorTG5011

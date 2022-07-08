@@ -9,14 +9,16 @@ logger = logging.getLogger(__name__)
 
 TIME_SLEEP = 0.6
 
+
 class LinearStageTDC001:
 
     def __init__(self, config_file: str, name: str):
 
         self.MAX_POSITION = 50  # mm
+        self.name = name
 
         with open(config_file, 'r') as f:
-            self.config = json.load(f)['stage'][name]
+            self.config = json.load(f)['stage'][self.name]
 
         self.serial = self.config['serial']
         self.start_position = self.config['start_position']
@@ -45,6 +47,9 @@ class LinearStageTDC001:
         self.acceleration = self.acceleration if acceleration is None else acceleration
         self.velocity = self.velocity if velocity is None else velocity
 
+        logger.info("Setting translation stage {} ({}) velocity {:.2f} mm/s and acceleration {:.2f} mm/s^2".format(
+            self.name, self.serial, self.velocity, self.acceleration
+        ))
         self._resource.set_velocity_params(acceleration_to_motor(self.acceleration), velocity_to_motor(self.velocity))
         time.sleep(TIME_SLEEP)
 
@@ -54,6 +59,7 @@ class LinearStageTDC001:
             previous_position = position + self.MAX_POSITION
 
         duration = compute_time_of_movement(position, self.velocity, self.acceleration, x0=previous_position)
+        logger.info("Moving translation stage {} ({}) to position {:.4f} mm".format(self.name, self.serial, position))
         self._resource.move_absolute(position=position_to_motor(position), now=True, bay=0, channel=0)
         time.sleep(duration + TIME_SLEEP)
 
@@ -63,7 +69,10 @@ class LinearStageTDC001:
                                        offset_distance=position_to_motor(self.offset_home))
         time.sleep(TIME_SLEEP)
         duration = compute_time_of_movement(self.MAX_POSITION, self.velocity_home, 0.1, 0)
-        duration += compute_time_of_movement(self.offset_home, self.velocity_home, 0.1 , 0)
+        duration += compute_time_of_movement(self.offset_home, self.velocity_home, 0.1, 0)
+        logger.info("Moving translation stage {} ({}) to home with offset {.4f} mm".format(self.name,
+                                                                                           self.serial,
+                                                                                           self.offset_home))
         self._resource.home()
         time.sleep(duration + TIME_SLEEP)
 

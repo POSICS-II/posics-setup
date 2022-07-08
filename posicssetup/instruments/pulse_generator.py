@@ -16,6 +16,7 @@ class PulseGeneratorTG5011:
         self.serial = self.config['serial']
         self._resource = rm.open_resource(self.serial)
         self.set_synch_out(False)
+        self.set_main_out(False)
         self._setup_pulse()
         self.beep()
 
