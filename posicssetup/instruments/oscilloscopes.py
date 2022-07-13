@@ -43,8 +43,8 @@ class PicoScope6000:
         self._data = [[(ctypes.c_int16 * self.n_samples)() for _ in range(self.n_channels)] for _ in range(self.n_waveforms)]
         self.times = np.linspace(0, stop=self.n_samples * self.delta_t, num=self.n_samples) - self.trigger_delay
 
-        self._setup_trigger()
-        self._setup_data()
+        #self._setup_trigger()
+        #self._setup_data()
 
     def __del__(self):
 
