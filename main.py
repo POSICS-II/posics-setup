@@ -11,6 +11,7 @@ import h5py
 from posicssetup.instruments.oscilloscopes import PicoScope6000
 from posicssetup.instruments.pulse_generator import PulseGeneratorTG5011
 from posicssetup.instruments.linear_stage import LinearStageTDC001
+from posicssetup.instruments.power_supply import Keithley2400
 
 matplotlib.use('TkAgg')
 
@@ -21,6 +22,9 @@ logger = logging.getLogger(__name__)
 config_file = 'config.json'
 
 output_file = h5py.File(json.load(open(config_file, 'r'))['writer']['output_file'], 'w')
+
+picoamp = Keithley2400('config.json')
+picoamp.set_output(True)
 
 stage_vertical = LinearStageTDC001(config_file=config_file, name='vertical')
 stage_horizontal = LinearStageTDC001(config_file=config_file, name='horizontal')
@@ -33,16 +37,18 @@ ps_2 = PicoScope6000(config_file=config_file, serial='FW881/048')
 ps_1.check_status()
 ps_2.check_status()
 
-stage_horizontal.move_to_start()
-stage_vertical.move_to_start()
+start_horizontal = stage_horizontal.center + stage_horizontal.length / 2
+start_vertical = stage_vertical.center + stage_vertical.length / 2
 
-x_previous = stage_horizontal.start_position
-y_previous = stage_vertical.start_position
+stage_horizontal.move_to(start_horizontal)
+stage_vertical.move_to(start_vertical)
 
+x_previous = start_horizontal
+y_previous = start_vertical
 
 for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
 
-    x = stage_horizontal.start_position - stage_horizontal.step * i
+    x = start_horizontal - stage_horizontal.step * i
     stage_horizontal.move_to(position=x, previous_position=x_previous)
 
     x_previous = x
@@ -50,7 +56,7 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
 
     for j in tqdm(iterator_y, desc='Vertical', leave=False):
 
-        y = stage_vertical.start_position - stage_vertical.step * j
+        y = start_vertical - stage_vertical.step * j
         stage_vertical.move_to(position=y, previous_position=y_previous)
 
         y_previous = y
@@ -77,19 +83,16 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
 
         dset = output_file.create_dataset("Step_{}_{}".format(i, j), data=data, )
 
-        """
-
         for i in range(6):
 
             plt.figure()
-            plt.plot(ps_1.times * 1E9, data[:, 0].T, label='Channel {}, x {:.4f} mm, y {:.4f} mm'.format(i + 1, x, y))
+            plt.plot(ps_1.times * 1E9, data[:, i].T, label='Channel {}'.format(i + 1))
             plt.xlabel('Time [ns]')
             plt.ylabel('ADC')
             plt.legend(loc='best')
             plt.savefig('tmp/test_channel_{}_x_{:.4f}_y_{:.4f}.png'.format(i + 1, x, y))
+            plt.close()
 
         print(data.sum(axis=0))
-        
-        """
 
 output_file.close()
