@@ -130,6 +130,6 @@
     }
   },
   "writer": {
-    "output_file": "tmp/scan_20220712_fiber.h5"
+    "output_file": "/DATA1/led_xyscan/scan_20220713_fiber.h5"
   }
 }

@@ -32,6 +32,7 @@ class Keithley2400:
 
         self.set_output(enable=False)
         self._resource.close()
+        logger.info('Closing Keithley2400 {}'.format(self.serial))
 
     def write(self, message: str):
 
@@ -48,8 +49,10 @@ class Keithley2400:
         if (voltage > 0) or (voltage < -35):
             raise ValueError('Too big Voltage {:.3f}'.format(voltage))
         self.write('SOUR:VOLT:LEV:IMM:AMPL {:.3f}'.format(voltage))
+        logger.info('Setting voltage of Keithley2400 ({}) to {:.3f}'.format(self.serial, voltage))
 
     def set_output(self, enable: bool):
 
         enable = 'ON' if enable else 'OFF'
         self.write('OUTP {}'.format(enable))
+        logger.info('Setting of Keithley2400 ({}) output to {}'.format(self.serial, enable))
