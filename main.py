@@ -86,10 +86,10 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
         for i in range(6):
 
             plt.figure()
-            plt.plot(ps_1.times * 1E9, data[:, i].T, label='Channel {}'.format(i + 1))
+            plt.title('Channel {}'.format(i + 1))
+            plt.plot(ps_1.times * 1E9, data[:, i].T)
             plt.xlabel('Time [ns]')
             plt.ylabel('ADC')
-            plt.legend(loc='best')
             plt.savefig('tmp/test_channel_{}_x_{:.4f}_y_{:.4f}.png'.format(i + 1, x, y))
             plt.close()
 

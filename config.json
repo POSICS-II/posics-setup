@@ -91,7 +91,7 @@
     "mode": "PULSE",
     "serial": "ASRL/dev/ttyACM0::INSTR",
     "frequency": 500,
-    "amplitude": 4.5,
+    "amplitude": 5.0,
     "offset": 0,
     "width": 20E-9,
     "delay": 0,
@@ -113,7 +113,7 @@
       "center": 21.82,
       "velocity": 0.3,
       "acceleration": 1.125,
-      "step": 1,
+      "step": 4,
       "length": 16,
       "velocity_home" : 0.3,
       "offset_home": 0
@@ -123,7 +123,7 @@
       "center" : 30.8,
       "velocity": 0.3,
       "acceleration": 1.125,
-      "step": 1,
+      "step": 4,
       "length": 16,
       "velocity_home" : 0.3,
       "offset_home": 0

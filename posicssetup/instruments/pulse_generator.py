@@ -41,6 +41,7 @@ class PulseGeneratorTG5011:
         self.beep()
         self.write('LOCAL')
         self._resource.close()
+        logger.info('Closing PulseGenerator ({})'.format(self.serial))
 
     def write(self, message: str):
 
