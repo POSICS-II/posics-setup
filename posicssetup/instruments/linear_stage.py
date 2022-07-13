@@ -7,7 +7,7 @@ import atexit
 
 logger = logging.getLogger(__name__)
 
-TIME_SLEEP = 0.6
+TIME_SLEEP = 1
 
 
 class LinearStageTDC001:
@@ -57,7 +57,8 @@ class LinearStageTDC001:
     def move_to(self, position: float, previous_position: float = None):
 
         if previous_position is None:
-            duration = compute_time_of_movement(0, self.velocity, self.acceleration, x0=self.MAX_POSITION)
+            distance = max(abs(self.MAX_POSITION - position), abs(position))
+            duration = compute_time_of_movement(distance, self.velocity, self.acceleration, x0=0)
 
         else:
             duration = compute_time_of_movement(position, self.velocity, self.acceleration, x0=previous_position)
