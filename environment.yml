@@ -13,6 +13,7 @@ dependencies:
   - tqdm
   - pip:
       - picosdk
+      - pymeasure
       - pyqt5
       - pystage-apt
       - thorlabs-apt-device

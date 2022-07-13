@@ -6,4 +6,6 @@ inst = PulseGeneratorTG5011(config_file='config.json')
 inst.set_main_out(True)
 inst.set_synch_out(True)
 
+input()
+
 inst.close()
