@@ -46,7 +46,7 @@
         "name": "D",
         "offset": -0.4,
         "bandwidth": "BW_FULL",
-        "enable": true,
+        "enable": false,
         "daq": 1
       },
       "5": {
@@ -73,7 +73,7 @@
         "name": "C",
         "offset": -0.4,
         "bandwidth": "BW_FULL",
-        "enable": false,
+        "enable": true,
         "daq": 2
       },
       "8": {
@@ -90,8 +90,8 @@
   "led": {
     "mode": "PULSE",
     "serial": "ASRL/dev/ttyACM0::INSTR",
-    "frequency": 1000.0,
-    "amplitude": 3.8,
+    "frequency": 500,
+    "amplitude": 4.5,
     "offset": 0,
     "width": 20E-9,
     "delay": 0,
@@ -104,32 +104,32 @@
     "current_2": 0.2
   },
   "sipm":{
-    "serial": "ASRL/dev/ttyUSB5::INSTR",
+    "serial": "ASRL/dev/ttyUSB4::INSTR",
     "voltage": -33.0
   },
   "stage": {
     "vertical": {
       "serial": "/dev/ttyUSB2",
-      "start_position": 27.08706941058534,
-      "velocity": 0.6,
+      "center": 21.82,
+      "velocity": 0.3,
       "acceleration": 1.125,
       "step": 1,
       "length": 16,
-      "velocity_home" : 0.6,
+      "velocity_home" : 0.3,
       "offset_home": 0
     },
     "horizontal": {
       "serial": "/dev/ttyUSB3",
-      "start_position": 20.321943940898787,
-      "velocity": 0.6,
+      "center" : 30.8,
+      "velocity": 0.3,
       "acceleration": 1.125,
       "step": 1,
       "length": 16,
-      "velocity_home" : 0.6,
+      "velocity_home" : 0.3,
       "offset_home": 0
     }
   },
   "writer": {
-    "output_file": "tmp/scan_20220708.h5"
+    "output_file": "tmp/scan_20220712_fiber.h5"
   }
 }
