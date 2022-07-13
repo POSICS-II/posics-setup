@@ -45,6 +45,8 @@ class Keithley2400:
 
     def set_voltage(self, voltage: float):
 
+        if (voltage > 0) or (voltage < -35):
+            raise ValueError('Too big Voltage {:.3f}'.format(voltage))
         self.write('SOUR:VOLT:LEV:IMM:AMPL {:.3f}'.format(voltage))
 
     def set_output(self, enable: bool):
