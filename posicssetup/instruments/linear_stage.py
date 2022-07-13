@@ -21,10 +21,10 @@ class LinearStageTDC001:
             self.config = json.load(f)['stage'][self.name]
 
         self.serial = self.config['serial']
-        self.start_position = self.config['start_position']
+        self.center = self.config['center']
         self.step = self.config['step']
         self.length = self.config['length']
-        self.n_steps = self.length // self.step
+        self.n_steps = self.length // self.step + 1
         assert self.length % self.step == 0
         self.velocity = self.config['velocity']
         self.acceleration = self.config['acceleration']
@@ -57,10 +57,13 @@ class LinearStageTDC001:
     def move_to(self, position: float, previous_position: float = None):
 
         if previous_position is None:
-            previous_position = position + self.MAX_POSITION
+            duration = compute_time_of_movement(0, self.velocity, self.acceleration, x0=self.MAX_POSITION)
 
-        duration = compute_time_of_movement(position, self.velocity, self.acceleration, x0=previous_position)
-        logger.info("Moving translation stage {} ({}) to position {:.4f} mm".format(self.name, self.serial, position))
+        else:
+            duration = compute_time_of_movement(position, self.velocity, self.acceleration, x0=previous_position)
+
+        logger.info("Moving translation stage {} ({}) to position {:.4f} mm\t Please wait {:.2f} seconds".format(
+            self.name, self.serial, position, duration))
         self._resource.move_absolute(position=position_to_motor(position), now=True, bay=0, channel=0)
         time.sleep(duration + TIME_SLEEP)
 
@@ -76,10 +79,3 @@ class LinearStageTDC001:
                                                                                            self.offset_home))
         self._resource.home()
         time.sleep(duration + TIME_SLEEP)
-
-    def move_to_start(self):
-
-        self.move_to(self.start_position)
-
-
-
