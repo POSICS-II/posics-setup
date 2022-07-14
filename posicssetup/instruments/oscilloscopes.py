@@ -40,11 +40,8 @@ class PicoScope6000:
 
         self.n_channels = self._setup_channels()
 
-        self._data = [[(ctypes.c_int16 * self.n_samples)() for _ in range(self.n_channels)] for _ in range(self.n_waveforms)]
+        self._data = (((ctypes.c_int16 * self.n_samples) * self.n_channels) * self.n_waveforms)()
         self.times = np.linspace(0, stop=self.n_samples * self.delta_t, num=self.n_samples) - self.trigger_delay
-
-        #self._setup_trigger()
-        #self._setup_data()
 
     def __del__(self):
 
@@ -143,16 +140,7 @@ class PicoScope6000:
         cmaxSamples = ctypes.c_int32(self.n_samples)
         self.status["GetValuesBulk"] = ps.ps6000GetValuesBulk(self._handle, ctypes.byref(cmaxSamples), 0,
                                                            self.n_waveforms - 1, 0, 0, None)
-        data = []
 
-        for segment in range(self.n_waveforms):
-
-            data.append([])
-
-            for j in range(self.n_channels):
-
-                data[segment].append(np.ctypeslib.as_array(self._data[segment][j]))
-
-        data = np.array(data)
+        data = np.ctypeslib.as_array(self._data)
 
         return data
