@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 config_file = 'config.json'
 
-output_file = h5py.File(json.load(open(config_file, 'r'))['writer']['output_file'], 'w')
+output_file = h5py.File(json.load(open(config_file, 'r'))['writer']['output_file'], 'x')
 
 picoamp = Keithley2400('config.json')
 picoamp.set_output(True)
@@ -81,18 +81,7 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
         pulse_generator.set_main_out(False)
         pulse_generator.set_synch_out(False)
 
-        dset = output_file.create_dataset("Step_{}_{}".format(i, j), data=data, )
-
-        for i in range(6):
-
-            plt.figure()
-            plt.title('Channel {}'.format(i + 1))
-            plt.plot(ps_1.times * 1E9, data[:, i].T)
-            plt.xlabel('Time [ns]')
-            plt.ylabel('ADC')
-            plt.savefig('tmp/test_channel_{}_x_{:.4f}_y_{:.4f}.png'.format(i + 1, x, y))
-            plt.close()
-
-        print(data.sum(axis=0))
+        dset = output_file.create_dataset("Step_{}_{}".format(i, j), data=data,
+                                          compression="gzip", compression_opts=9)
 
 output_file.close()
