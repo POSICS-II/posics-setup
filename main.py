@@ -30,6 +30,7 @@ stage_vertical = LinearStageTDC001(config_file=config_file, name='vertical')
 stage_horizontal = LinearStageTDC001(config_file=config_file, name='horizontal')
 
 pulse_generator = PulseGeneratorTG5011(config_file=config_file)
+pulse_generator.set_main_out(True)
 
 ps_1 = PicoScope6000(config_file=config_file, serial='FW878/020')
 ps_2 = PicoScope6000(config_file=config_file, serial='FW881/048')
@@ -66,8 +67,7 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
         ps_1._setup_data()
         ps_2._setup_data()
 
-        pulse_generator.set_main_out(True)
-        time.sleep(5)
+        time.sleep(2)
         pulse_generator.set_synch_out(True)
 
         data_1 = ps_1.read_data()
@@ -78,10 +78,8 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
 
         data = np.hstack([data_1, data_2])
 
-        pulse_generator.set_main_out(False)
         pulse_generator.set_synch_out(False)
 
-        dset = output_file.create_dataset("Step_{}_{}".format(i, j), data=data,
-                                          compression="gzip", compression_opts=9)
+        output_file.create_dataset("Step_{}_{}".format(i, j), data=data, compression="gzip", compression_opts=9)
 
 output_file.close()
