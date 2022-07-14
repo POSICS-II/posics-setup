@@ -31,6 +31,7 @@ class Keithley2400:
     def close(self):
 
         self.set_output(enable=False)
+        self.write('SYST:LOC')
         self._resource.close()
         logger.info('Closing Keithley2400 {}'.format(self.serial))
 
