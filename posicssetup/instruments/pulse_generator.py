@@ -19,9 +19,11 @@ class PulseGeneratorTG5011:
 
         self.serial = self.config['serial']
         self._resource = rm.open_resource(self.serial, send_end=True)
+        self.reset()
+        self.is_trigger_out_on = True
+        self.set_synch_out(False)
         self.set_main_out(False)
         self._setup_pulse()
-        self.is_trigger_out_on = False
         self.beep()
 
         atexit.register(self.close)
@@ -33,6 +35,10 @@ class PulseGeneratorTG5011:
     def beep(self):
 
         self.write('BEEP')
+
+    def reset(self):
+
+        self.write('*RST')
 
     def close(self):
 
