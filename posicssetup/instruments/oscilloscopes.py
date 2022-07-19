@@ -41,6 +41,7 @@ class PicoScope6000:
         self.n_channels = self._setup_channels()
 
         self._data = (((ctypes.c_int16 * self.n_samples) * self.n_channels) * self.n_waveforms)()
+        self._trigger_times = (ctypes.c_int64 * self.n_waveforms)()
         self.times = np.linspace(0, stop=self.n_samples * self.delta_t, num=self.n_samples) - self.trigger_delay
 
     def __del__(self):
@@ -122,9 +123,9 @@ class PicoScope6000:
 
     def check_status(self):
 
+        logger.debug("Checking status for oscilloscope {} ({})".format(self.handle, self.serial))
         for key, val in self.status.items():
 
-            logger.debug("Checking callback of function ps6000{}()".format(key))
             assert_pico_ok(val)
 
     def read_data(self):
@@ -133,14 +134,30 @@ class PicoScope6000:
 
         ready = ctypes.c_int16(0)
         check = ctypes.c_int16(0)
+        logger.debug('Waiting for data of ({})'.format(self.serial))
         while ready.value == check.value:
             self.status["IsReady"] = ps.ps6000IsReady(self._handle, ctypes.byref(ready))
             time.sleep(0.1)
 
-        cmaxSamples = ctypes.c_int32(self.n_samples)
-        self.status["GetValuesBulk"] = ps.ps6000GetValuesBulk(self._handle, ctypes.byref(cmaxSamples), 0,
+        max_samples = ctypes.c_int32(self.n_samples)
+        self.status["GetValuesBulk"] = ps.ps6000GetValuesBulk(self._handle, ctypes.byref(max_samples), 0,
                                                            self.n_waveforms - 1, 0, 0, None)
 
         data = np.ctypeslib.as_array(self._data)
-
+        logger.debug('Data from ({}) received'.format(self.serial))
         return data
+
+    def read_trigger_times(self):
+
+        self.check_status()
+
+        time_units = (ctypes.c_uint32 * self.n_waveforms)()
+
+        self.status['GetValuesTriggerTimeOffsetBulk64'] = ps.ps6000GetValuesTriggerTimeOffsetBulk64(
+            self._handle, ctypes.byref(self._trigger_times), ctypes.byref(time_units), 0, self.n_waveforms - 1)
+        times = np.ctypeslib.as_array(self._trigger_times)
+        logger.debug('Trigger times from ({}) received'.format(self.serial))
+
+        print(np.ctypeslib.as_array(time_units))
+        return times
+
