@@ -9,7 +9,7 @@
       "delay": 0,
       "n_pre_samples": 200,
       "n_post_samples": 800,
-      "n_waveforms": 1000,
+      "n_waveforms": 5000,
       "delta_t": 800E-12
     },
     "channel": {
@@ -91,7 +91,7 @@
     "mode": "PULSE",
     "serial": "ASRL/dev/ttyACM0::INSTR",
     "frequency": 500,
-    "amplitude": 5.0,
+    "amplitude": 4.8,
     "offset": 0,
     "width": 20E-9,
     "delay": 0,
@@ -104,32 +104,39 @@
     "current_2": 0.2
   },
   "sipm":{
-    "serial": "ASRL/dev/ttyUSB4::INSTR",
+    "serial": "ASRL/dev/ttyUSB0::INSTR",
     "voltage": -33.0
   },
   "stage": {
     "vertical": {
-      "serial": "/dev/ttyUSB2",
-      "center": 21.82,
+      "serial": "/dev/ttyUSB3",
+      "center": 25.82,
       "velocity": 0.3,
       "acceleration": 1.125,
-      "step": 4,
-      "length": 16,
+      "step": 1,
+      "length": 18,
       "velocity_home" : 0.3,
       "offset_home": 0
     },
     "horizontal": {
-      "serial": "/dev/ttyUSB3",
-      "center" : 30.8,
+      "serial": "/dev/ttyUSB4",
+      "center" : 28.8,
       "velocity": 0.3,
       "acceleration": 1.125,
-      "step": 4,
-      "length": 16,
+      "step": 1,
+      "length": 18,
       "velocity_home" : 0.3,
       "offset_home": 0
     }
   },
   "writer": {
-    "output_file": "/DATA1/led_xyscan/scan_20220713_fiber.h5"
+    "basename": "xy_scan_fiber_{date:}",
+    "directory": "/DATA1/{date:}",
+    "compression": "gzip",
+    "compression_opts": 9
+  },
+  "logger": {
+    "format": "%(asctime)s %(name)s %(levelname)s:%(message)s",
+    "level": "DEBUG"
   }
 }

@@ -19,9 +19,9 @@ class PulseGeneratorTG5011:
 
         self.serial = self.config['serial']
         self._resource = rm.open_resource(self.serial, send_end=True)
-        self.set_synch_out(False)
         self.set_main_out(False)
         self._setup_pulse()
+        self.is_trigger_out_on = False
         self.beep()
 
         atexit.register(self.close)
@@ -36,8 +36,8 @@ class PulseGeneratorTG5011:
 
     def close(self):
 
-        self.set_synch_out(False)
         self.set_main_out(False)
+        self.set_synch_out(False)
         self.beep()
         self.write('LOCAL')
         self._resource.close()
@@ -45,13 +45,13 @@ class PulseGeneratorTG5011:
 
     def write(self, message: str):
 
-        time.sleep(TIME_SLEEP)
         self._resource.write(message, )
+        time.sleep(TIME_SLEEP)
 
     def query(self, message: str):
 
-        time.sleep(TIME_SLEEP)
         response = self._resource.query(message)
+        time.sleep(TIME_SLEEP)
 
         return response
 
@@ -69,12 +69,24 @@ class PulseGeneratorTG5011:
 
         message = 'ON' if enable else 'OFF'
 
-        self.write('SYNCOUT {}'.format(message))
-        logger.info('Setting trigger output of pulse generator ({}) to {}'.format(self.serial, message))
+        if enable:
+            if self.is_trigger_out_on:
+                pass
+            else:
+                self.write('SYNCOUT {}'.format(message))
+                self.is_trigger_out_on = True
+        else:
+            if self.is_trigger_out_on:
+                self.write('SYNCOUT {}'.format(message))
+                self.is_trigger_out_on = False
+            else:
+                pass
+
+        logger.info('Setting synch output of pulse generator ({}) to {}'.format(self.serial, message))
 
     def set_main_out(self, enable: bool):
 
         message = 'ON' if enable else 'OFF'
 
-        self.write('OUTPUT {}'.format(message))
         logger.info('Setting main output of pulse generator ({}) to {}'.format(self.serial, message))
+        self.write('OUTPUT {}'.format(message))
