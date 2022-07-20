@@ -91,7 +91,7 @@
     "mode": "PULSE",
     "serial": "ASRL/dev/ttyACM0::INSTR",
     "frequency": 500,
-    "amplitude": 4.8,
+    "amplitude": 3.85,
     "offset": 0,
     "width": 20E-9,
     "delay": 0,
@@ -136,7 +136,7 @@
     "compression_opts": 9
   },
   "logger": {
-    "format": "%(asctime)s %(name)s %(levelname)s:%(message)s",
-    "level": "DEBUG"
+    "format": "%(asctime)s [%(name)s] [%(levelname)-5.5s]  %(message)s",
+    "level": "INFO"
   }
 }
