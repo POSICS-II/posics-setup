@@ -15,7 +15,7 @@ class Logger:
         self.logger = logging.getLogger()
         self.log_level = self.config['level']
         self._file_handler = logging.FileHandler(self.output_file)
-        formatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)-5.5s]  %(message)s")
+        formatter = logging.Formatter(self.config['format'])
         self.logger.setLevel(self.log_level)
         self._file_handler.setFormatter(formatter)
         self.logger.addHandler(self._file_handler)
