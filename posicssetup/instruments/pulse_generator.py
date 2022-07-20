@@ -42,6 +42,7 @@ class PulseGeneratorTG5011:
 
     def close(self):
 
+        self.reset()
         self.set_main_out(False)
         self.set_synch_out(False)
         self.beep()
