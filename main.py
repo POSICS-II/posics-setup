@@ -16,11 +16,6 @@ from posicssetup.io.logger import Logger
 
 
 matplotlib.use('TkAgg')
-
-
-#logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
-#logger = logging.getLogger(__name__)
-
 config_file = 'config.json'
 
 basename = get_basename(config_file)
@@ -38,10 +33,10 @@ pulse_generator.set_main_out(True)
 pulse_generator.set_synch_out(False)
 
 ps_1 = PicoScope6000(config_file=config_file, serial='FW878/020')
-# ps_2 = PicoScope6000(config_file=config_file, serial='FW881/048')
+ps_2 = PicoScope6000(config_file=config_file, serial='FW881/048')
 
 ps_1.check_status()
-# ps_2.check_status()
+ps_2.check_status()
 
 start_horizontal = stage_horizontal.center + stage_horizontal.length / 2
 start_vertical = stage_vertical.center + stage_vertical.length / 2
@@ -71,25 +66,25 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
         y_previous = y
 
         ps_1._setup_trigger()
-        # ps_2._setup_trigger()
+        ps_2._setup_trigger()
         ps_1._setup_data()
-        # ps_2._setup_data()
+        ps_2._setup_data()
 
         time.sleep(2)
         pulse_generator.set_synch_out(True)
         time.sleep(2)
 
         data_1 = ps_1.read_data()
-        # data_2 = ps_2.read_data()
+        data_2 = ps_2.read_data()
         # times_1 = ps_1.read_trigger_times()
         # times_2 = ps_2.read_trigger_times()
 
         ps_1.check_status()
-        # ps_2.check_status()
+        ps_2.check_status()
 
-        # data = np.hstack([data_1, data_2])
+        data = np.hstack([data_1, data_2])
+        # data = data_1
         # times = np.hstack([times_1, times_2])
-        data = data_1
         # times = times_1
 
         pulse_generator.set_synch_out(False)
@@ -103,6 +98,7 @@ for i in tqdm(range(stage_horizontal.n_steps), desc='Horizontal', leave=False):
         axes.set_ylabel('ADC []')
         legend = ['Channel {}'.format(i) for i in range(data.shape[1])]
         axes.legend(legend, loc='best')
+        axes.set_ylim(ps_1.min_value, ps_1.max_value)
         fig.savefig(basename + '_waveforms_step_{}_{}.png'.format(i, j))
 
         # plt.figure()

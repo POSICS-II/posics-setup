@@ -12,7 +12,7 @@ x_position = 28.8
 y_position = 25.82
 
 stage_horizontal.move_to(x_position)
-#stage_vertical.move_to(y_position)
+stage_vertical.move_to(y_position)
 
 
 
