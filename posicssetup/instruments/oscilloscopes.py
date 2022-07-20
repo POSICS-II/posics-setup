@@ -44,6 +44,9 @@ class PicoScope6000:
         self._trigger_times = (ctypes.c_int64 * self.n_waveforms)()
         self.times = np.linspace(0, stop=self.n_samples * self.delta_t, num=self.n_samples) - self.trigger_delay
 
+        self.min_value = -32512
+        self.max_value = 32512
+
     def __del__(self):
 
         self.status['Stop'] = ps.ps6000Stop(self._handle)
@@ -151,13 +154,7 @@ class PicoScope6000:
 
         self.check_status()
 
-        time_units = (ctypes.c_uint32 * self.n_waveforms)()
+        trigger_info = (ps.PS6000_TRIGGER_INFO * self.n_waveforms)()
 
-        self.status['GetValuesTriggerTimeOffsetBulk64'] = ps.ps6000GetValuesTriggerTimeOffsetBulk64(
-            self._handle, ctypes.byref(self._trigger_times), ctypes.byref(time_units), 0, self.n_waveforms - 1)
-        times = np.ctypeslib.as_array(self._trigger_times)
-        logger.debug('Trigger times from ({}) received'.format(self.serial))
-
-        print(np.ctypeslib.as_array(time_units))
-        return times
+        return trigger_info
 
